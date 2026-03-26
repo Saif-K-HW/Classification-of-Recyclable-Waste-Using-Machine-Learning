@@ -1,0 +1,18 @@
+============================================================
+RECYCLABLE WASTE DATASET - MATERIAL SUMMARY
+============================================================
+
+Ceramic: 1 items
+Glass: 1 items
+Metal: 1 items
+Mixed: 13 items
+Organic: 1 items
+Paper: 7 items
+Plastic: 13 items
+Rubber: 2 items
+Styrofoam: 1 items
+Textile: 3 items
+Wood: 2 items
+
+Total items: 45
+Total material categories: 11
