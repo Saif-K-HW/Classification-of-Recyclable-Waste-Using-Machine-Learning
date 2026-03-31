@@ -1,0 +1,2 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms,model_size_mb
+baseline_cnn,1194,3.843646,3.2191,294.2771

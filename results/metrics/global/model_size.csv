@@ -1,0 +1,4 @@
+model_name,model_size_mb
+baseline_cnn,294.2771
+mobilenet_frozen,11.0693
+mobilenet_finetuned,20.2854

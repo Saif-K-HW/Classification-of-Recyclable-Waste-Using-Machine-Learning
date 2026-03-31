@@ -1,0 +1,11 @@
+model_name,true_label,pred_label,count
+mobilenet_finetuned,Plastic,Mixed,20
+mobilenet_finetuned,Mixed,Paper,15
+mobilenet_finetuned,Mixed,Metal,14
+mobilenet_finetuned,Plastic,Textile,12
+mobilenet_finetuned,Mixed,Plastic,10
+mobilenet_finetuned,Plastic,Styrofoam,10
+mobilenet_finetuned,Mixed,Textile,8
+mobilenet_finetuned,Paper,Mixed,8
+mobilenet_finetuned,Paper,Plastic,7
+mobilenet_finetuned,Paper,Styrofoam,7

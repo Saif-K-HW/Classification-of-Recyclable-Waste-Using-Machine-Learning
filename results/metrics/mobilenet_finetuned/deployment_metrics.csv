@@ -1,0 +1,2 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms,model_size_mb
+mobilenet_finetuned,1194,10.95707,9.1768,20.2854

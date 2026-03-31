@@ -1,0 +1,4 @@
+Model,Test Acc,Macro F1,Params,Training Time
+baseline_cnn,0.458961,0.431826,25711051,1844.555
+mobilenet_frozen,0.80737,0.782893,2423371,1265.9
+mobilenet_finetuned,0.838358,0.813328,2423371,564.444
