@@ -1,0 +1,2 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms,model_size_mb
+densenet121_frozen,1194,43.61644,36.5297,28.7849

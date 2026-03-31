@@ -1,0 +1,2 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms,model_size_mb
+efficientnetb0_frozen,1194,21.066847,17.6439,16.8789

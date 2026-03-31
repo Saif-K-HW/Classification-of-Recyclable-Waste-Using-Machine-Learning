@@ -1,0 +1,2 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms,model_size_mb
+mobilenetv2_frozen,1194,13.586849,11.3793,9.8018

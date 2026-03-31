@@ -1,0 +1,9 @@
+model_name,epochs_ran,best_epoch,best_val_accuracy,best_val_loss,training_time_sec,parameter_count,run_name,backbone,loss,class_weight_cap,augmentation,run_timestamp
+mobilenetv2_frozen,20,20,0.8197820782661438,0.5477694869041443,1338.668,2423371,mobilenetv2,mobilenetv2,cross_entropy,,default,2026-03-23T02:58:04
+mobilenetv2_finetuned,8,8,0.8575021028518677,0.4648243188858032,552.62,2423371,mobilenetv2,mobilenetv2,cross_entropy,,default,2026-03-23T02:58:04
+efficientnetb0_frozen,20,20,0.8449287414550781,0.4735623002052307,2184.053,4214958,efficientnetb0,efficientnetb0,cross_entropy,,default,2026-03-23T02:58:04
+efficientnetb0_finetuned,8,8,0.8373847603797913,0.5214201211929321,946.173,4214958,efficientnetb0,efficientnetb0,cross_entropy,,default,2026-03-23T02:58:04
+resnet50_frozen,20,19,0.8725901246070862,0.3844597339630127,3524.928,23851403,resnet50,resnet50,cross_entropy,,default,2026-03-23T02:58:04
+resnet50_finetuned,8,8,0.9010896682739258,0.29374730587005615,1892.746,23851403,resnet50,resnet50,cross_entropy,,default,2026-03-23T02:58:04
+densenet121_frozen,20,20,0.803855836391449,0.6042135953903198,3994.347,7170123,densenet121,densenet121,cross_entropy,,default,2026-03-23T02:58:04
+densenet121_finetuned,8,8,0.8088851571083069,0.5946853160858154,1675.978,7170123,densenet121,densenet121,cross_entropy,,default,2026-03-23T02:58:04

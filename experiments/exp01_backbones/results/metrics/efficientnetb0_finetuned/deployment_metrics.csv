@@ -1,0 +1,2 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms,model_size_mb
+efficientnetb0_finetuned,1194,21.381571,17.9075,16.8788

@@ -1,0 +1,9 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms
+mobilenetv2_frozen,1194,13.586849,11.3793
+mobilenetv2_finetuned,1194,12.842687,10.756
+efficientnetb0_frozen,1194,21.066847,17.6439
+efficientnetb0_finetuned,1194,21.381571,17.9075
+resnet50_frozen,1194,32.523173,27.2388
+resnet50_finetuned,1194,32.239701,27.0014
+densenet121_frozen,1194,43.61644,36.5297
+densenet121_finetuned,1194,43.422789,36.3675

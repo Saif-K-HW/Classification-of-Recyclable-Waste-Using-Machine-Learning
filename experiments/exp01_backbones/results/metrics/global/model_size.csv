@@ -1,0 +1,9 @@
+model_name,model_size_mb
+mobilenetv2_frozen,9.8018
+mobilenetv2_finetuned,9.8018
+efficientnetb0_frozen,16.8789
+efficientnetb0_finetuned,16.8788
+resnet50_frozen,91.6096
+resnet50_finetuned,91.6096
+densenet121_frozen,28.7849
+densenet121_finetuned,28.7849

@@ -1,0 +1,12 @@
+{
+  "backbones": [
+    "resnet50",
+    "mobilenetv2",
+    "efficientnetb0",
+    "densenet121"
+  ],
+  "augmentation": "default",
+  "loss": "cross_entropy",
+  "include_baseline": false,
+  "steps": ["train", "evaluate", "error_analysis"]
+}

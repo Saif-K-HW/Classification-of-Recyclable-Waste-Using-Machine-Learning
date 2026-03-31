@@ -1,0 +1,9 @@
+model_name,accuracy,macro_precision,macro_recall,macro_f1
+mobilenetv2_frozen,0.802345,0.738005,0.854533,0.781868
+mobilenetv2_finetuned,0.838358,0.784316,0.875643,0.820365
+efficientnetb0_frozen,0.840034,0.776842,0.886247,0.81431
+efficientnetb0_finetuned,0.840034,0.7724,0.894352,0.819387
+resnet50_frozen,0.850921,0.79221,0.874409,0.825022
+resnet50_finetuned,0.872697,0.849182,0.880859,0.862687
+densenet121_frozen,0.783082,0.728319,0.885831,0.777953
+densenet121_finetuned,0.777219,0.717149,0.881042,0.77109
