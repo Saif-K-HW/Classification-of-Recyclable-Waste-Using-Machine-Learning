@@ -1,0 +1,2 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms,model_size_mb
+aug_off_resnet50_frozen,1194,29.944569,25.0792,91.6096

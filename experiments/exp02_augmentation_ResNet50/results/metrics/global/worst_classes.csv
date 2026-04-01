@@ -1,0 +1,6 @@
+model_name,label,recall
+aug_off_resnet50_finetuned,Styrofoam,0.777778
+aug_off_resnet50_finetuned,Rubber,0.846154
+aug_off_resnet50_finetuned,Paper,0.848684
+aug_off_resnet50_finetuned,Plastic,0.859779
+aug_off_resnet50_finetuned,Glass,0.875

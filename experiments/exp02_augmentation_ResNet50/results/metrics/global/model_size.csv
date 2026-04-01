@@ -1,0 +1,5 @@
+model_name,model_size_mb
+aug_on_resnet50_frozen,91.6096
+aug_on_resnet50_finetuned,91.6096
+aug_off_resnet50_frozen,91.6096
+aug_off_resnet50_finetuned,91.6096

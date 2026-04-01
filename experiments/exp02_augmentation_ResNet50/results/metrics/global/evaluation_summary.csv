@@ -1,0 +1,5 @@
+model_name,accuracy,macro_precision,macro_recall,macro_f1
+aug_on_resnet50_frozen,0.847571,0.801163,0.879124,0.831898
+aug_on_resnet50_finetuned,0.88191,0.848407,0.888144,0.865444
+aug_off_resnet50_frozen,0.870184,0.822769,0.91114,0.860812
+aug_off_resnet50_finetuned,0.894472,0.882238,0.89613,0.888099

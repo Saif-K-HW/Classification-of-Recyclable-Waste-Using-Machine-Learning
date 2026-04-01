@@ -1,0 +1,18 @@
+{
+  "include_baseline": false,
+  "backbone": "resnet50",
+  "loss": "cross_entropy",
+  "steps": ["train", "evaluate", "error_analysis"],
+  "training_plan": [
+    {
+      "name": "aug_on",
+      "backbone": "resnet50",
+      "augmentation": "default"
+    },
+    {
+      "name": "aug_off",
+      "backbone": "resnet50",
+      "augmentation": "none"
+    }
+  ]
+}

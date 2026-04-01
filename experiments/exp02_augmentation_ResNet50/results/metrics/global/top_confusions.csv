@@ -1,0 +1,11 @@
+model_name,true_label,pred_label,count
+aug_off_resnet50_finetuned,Plastic,Mixed,15
+aug_off_resnet50_finetuned,Mixed,Plastic,9
+aug_off_resnet50_finetuned,Mixed,Paper,9
+aug_off_resnet50_finetuned,Paper,Mixed,9
+aug_off_resnet50_finetuned,Plastic,Paper,8
+aug_off_resnet50_finetuned,Plastic,Textile,8
+aug_off_resnet50_finetuned,Mixed,Textile,6
+aug_off_resnet50_finetuned,Paper,Plastic,6
+aug_off_resnet50_finetuned,Ceramic,Mixed,5
+aug_off_resnet50_finetuned,Mixed,Metal,4

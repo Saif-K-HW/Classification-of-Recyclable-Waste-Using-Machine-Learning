@@ -1,0 +1,2 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms,model_size_mb
+aug_on_resnet50_finetuned,1194,29.607628,24.797,91.6096
