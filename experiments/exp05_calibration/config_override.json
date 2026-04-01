@@ -1,0 +1,4 @@
+{
+  "steps": ["calibration"],
+  "model_path": "models/resnet50_finetuned_best.keras"
+}
