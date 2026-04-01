@@ -1,0 +1,10 @@
+{
+  "backbone": "resnet50",
+  "augmentation": "default",
+  "loss": "cross_entropy",
+  "finetune_unfreeze_layers": 40,
+  "finetune_lr": 0.000005,
+  "finetune_epochs": 15,
+  "include_baseline": false,
+  "steps": ["train", "evaluate", "error_analysis"]
+}

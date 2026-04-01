@@ -1,0 +1,3 @@
+Model,Test Acc,Macro F1,Params,Training Time
+resnet50_frozen,0.847571,0.835999,23851403,3649.842
+resnet50_finetuned,0.897822,0.8813,23851403,4532.567

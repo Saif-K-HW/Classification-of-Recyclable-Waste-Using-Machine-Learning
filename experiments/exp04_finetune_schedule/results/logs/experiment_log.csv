@@ -1,0 +1,3 @@
+model_name,epochs_ran,best_epoch,best_val_accuracy,best_val_loss,training_time_sec,parameter_count,run_name,backbone,loss,class_weight_cap,augmentation,run_timestamp
+resnet50_frozen,20,20,0.8650460839271545,0.3974478840827942,3649.842,23851403,main,resnet50,cross_entropy,,default,2026-03-25T19:40:11
+resnet50_finetuned,15,15,0.9027661085128784,0.29553693532943726,4532.567,23851403,main,resnet50,cross_entropy,,default,2026-03-25T19:40:11

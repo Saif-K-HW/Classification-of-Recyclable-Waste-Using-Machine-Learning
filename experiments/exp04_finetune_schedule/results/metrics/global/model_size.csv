@@ -1,0 +1,3 @@
+model_name,model_size_mb
+resnet50_frozen,91.6096
+resnet50_finetuned,91.6095
