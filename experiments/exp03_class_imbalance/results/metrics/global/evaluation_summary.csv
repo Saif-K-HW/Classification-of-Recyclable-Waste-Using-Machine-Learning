@@ -1,0 +1,7 @@
+model_name,accuracy,macro_precision,macro_recall,macro_f1
+uncapped_ce_resnet50_frozen,0.856784,0.80105,0.887427,0.836418
+uncapped_ce_resnet50_finetuned,0.878559,0.838785,0.891808,0.861504
+capped10_ce_resnet50_frozen,0.848409,0.787891,0.887598,0.826782
+capped10_ce_resnet50_finetuned,0.884422,0.857191,0.889534,0.871914
+focal_capped10_resnet50_frozen,0.852596,0.806502,0.86119,0.828829
+focal_capped10_resnet50_finetuned,0.886097,0.858926,0.886056,0.869596

@@ -1,0 +1,6 @@
+model_name,label,recall
+focal_capped10_resnet50_finetuned,Styrofoam,0.722222
+focal_capped10_resnet50_finetuned,Wood,0.84
+focal_capped10_resnet50_finetuned,Mixed,0.851955
+focal_capped10_resnet50_finetuned,Rubber,0.871795
+focal_capped10_resnet50_finetuned,Plastic,0.874539

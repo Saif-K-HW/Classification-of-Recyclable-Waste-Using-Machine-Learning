@@ -1,0 +1,7 @@
+Model,Test Acc,Macro F1,Params,Training Time
+uncapped_ce_resnet50_frozen,0.856784,0.836418,23851403,3433.206
+uncapped_ce_resnet50_finetuned,0.878559,0.861504,23851403,1915.013
+capped10_ce_resnet50_frozen,0.848409,0.826782,23851403,3495.441
+capped10_ce_resnet50_finetuned,0.884422,0.871914,23851403,1810.366
+focal_capped10_resnet50_frozen,0.852596,0.828829,23851403,3496.435
+focal_capped10_resnet50_finetuned,0.886097,0.869596,23851403,1899.263

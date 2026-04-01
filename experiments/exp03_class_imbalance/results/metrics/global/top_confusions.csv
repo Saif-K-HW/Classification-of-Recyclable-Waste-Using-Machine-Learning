@@ -1,0 +1,11 @@
+model_name,true_label,pred_label,count
+focal_capped10_resnet50_finetuned,Mixed,Paper,19
+focal_capped10_resnet50_finetuned,Mixed,Plastic,17
+focal_capped10_resnet50_finetuned,Plastic,Mixed,13
+focal_capped10_resnet50_finetuned,Plastic,Paper,7
+focal_capped10_resnet50_finetuned,Mixed,Textile,6
+focal_capped10_resnet50_finetuned,Plastic,Textile,5
+focal_capped10_resnet50_finetuned,Paper,Plastic,5
+focal_capped10_resnet50_finetuned,Mixed,Metal,5
+focal_capped10_resnet50_finetuned,Ceramic,Paper,3
+focal_capped10_resnet50_finetuned,Paper,Textile,3

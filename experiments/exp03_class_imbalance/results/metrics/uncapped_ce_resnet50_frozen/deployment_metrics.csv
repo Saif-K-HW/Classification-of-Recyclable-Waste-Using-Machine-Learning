@@ -1,0 +1,2 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms,model_size_mb
+uncapped_ce_resnet50_frozen,1194,30.727689,25.7351,91.6096

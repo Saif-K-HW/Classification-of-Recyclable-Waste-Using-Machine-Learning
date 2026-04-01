@@ -1,0 +1,26 @@
+{
+  "augmentation": "default",
+  "include_baseline": false,
+  "analysis_model": "focal_capped10_resnet50_finetuned",
+  "steps": ["train", "evaluate", "error_analysis"],
+  "training_plan": [
+    {
+      "name": "uncapped_ce",
+      "backbone": "resnet50",
+      "loss": "cross_entropy",
+      "class_weight_cap": null
+    },
+    {
+      "name": "capped10_ce",
+      "backbone": "resnet50",
+      "loss": "cross_entropy",
+      "class_weight_cap": 10
+    },
+    {
+      "name": "focal_capped10",
+      "backbone": "resnet50",
+      "loss": "focal",
+      "class_weight_cap": 10
+    }
+  ]
+}

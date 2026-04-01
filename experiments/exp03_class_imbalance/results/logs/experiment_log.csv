@@ -1,0 +1,7 @@
+model_name,epochs_ran,best_epoch,best_val_accuracy,best_val_loss,training_time_sec,parameter_count,run_name,backbone,loss,class_weight_cap,augmentation,run_timestamp
+uncapped_ce_resnet50_frozen,20,19,0.8709136843681335,0.37902769446372986,3433.206,23851403,uncapped_ce,resnet50,cross_entropy,,default,2026-03-24T14:14:31
+uncapped_ce_resnet50_finetuned,8,8,0.9061190485954285,0.30725082755088806,1915.013,23851403,uncapped_ce,resnet50,cross_entropy,,default,2026-03-24T14:14:31
+capped10_ce_resnet50_frozen,20,19,0.8591785430908203,0.4064595699310303,3495.441,23851403,capped10_ce,resnet50,cross_entropy,10.0,default,2026-03-24T14:14:31
+capped10_ce_resnet50_finetuned,8,8,0.9036043882369995,0.29753124713897705,1810.366,23851403,capped10_ce,resnet50,cross_entropy,10.0,default,2026-03-24T14:14:31
+focal_capped10_resnet50_frozen,20,20,0.8616932034492493,0.21900951862335205,3496.435,23851403,focal_capped10,resnet50,focal,10.0,default,2026-03-24T14:14:31
+focal_capped10_resnet50_finetuned,8,8,0.8977367877960205,0.17397288978099823,1899.263,23851403,focal_capped10,resnet50,focal,10.0,default,2026-03-24T14:14:31

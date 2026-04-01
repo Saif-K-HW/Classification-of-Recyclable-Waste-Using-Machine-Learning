@@ -1,0 +1,2 @@
+model_name,num_samples,total_inference_time_sec,avg_inference_time_ms,model_size_mb
+focal_capped10_resnet50_frozen,1194,29.819559,24.9745,91.6096

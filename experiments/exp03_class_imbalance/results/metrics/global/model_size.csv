@@ -1,0 +1,7 @@
+model_name,model_size_mb
+uncapped_ce_resnet50_frozen,91.6096
+uncapped_ce_resnet50_finetuned,91.6096
+capped10_ce_resnet50_frozen,91.6096
+capped10_ce_resnet50_finetuned,91.6096
+focal_capped10_resnet50_frozen,91.6096
+focal_capped10_resnet50_finetuned,91.6096
