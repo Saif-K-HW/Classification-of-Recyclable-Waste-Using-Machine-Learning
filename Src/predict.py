@@ -21,6 +21,7 @@ import tensorflow as tf
 
 from config import IMAGE_SIZE, MODELS_DIR
 from data_loader import load_class_names
+from model_io import load_saved_model
 
 
 def _preprocess_image(image_path: Path) -> tf.Tensor:
@@ -48,7 +49,7 @@ def _resolve_model_path(model_path: str | None = None) -> Path:
             if candidate.exists():
                 return candidate
 
-    return MODELS_DIR / "mobilenet_finetuned_best.keras"
+    return MODELS_DIR / "resnet50_finetuned_best.keras"
 
 
 def predict_image(
@@ -66,7 +67,7 @@ def predict_image(
         raise FileNotFoundError(f"Model not found: {model_file}. Train first or update models/final_model.txt.")
 
     class_names = load_class_names(Path(class_names_path) if class_names_path else None)
-    model = tf.keras.models.load_model(model_file)
+    model = load_saved_model(model_file, compile_model=False)
 
     # Run inference and collect top-3 predicted classes
     image_tensor = _preprocess_image(image_file)
@@ -154,7 +155,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--model_path",
         default=None,
-        help="Optional model path. If omitted, we use final_model.txt then mobilenet_finetuned_best.keras.",
+        help="Optional model path. If omitted, we use final_model.txt then resnet50_finetuned_best.keras.",
     )
     parser.add_argument(
         "--class_names_path",

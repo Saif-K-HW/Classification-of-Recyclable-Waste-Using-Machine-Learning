@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from PIL import Image
 
-from config import METRICS_GLOBAL_DIR, PLOTS_GLOBAL_DIR, SEED, ensure_directories, set_global_seed
+from config import METRICS_GLOBAL_DIR, MODELS_DIR, PLOTS_GLOBAL_DIR, SEED, ensure_directories, set_global_seed
 from make_splits import collect_image_records
 
 
@@ -76,6 +76,49 @@ def _save_sample_grid(sample_df: pd.DataFrame) -> None:
     plt.close()
 
 
+def _resolve_default_calibration_model() -> Path | None:
+    # Use final model pointer first so calibration tracks the latest stable best checkpoint.
+    final_pointer_path = MODELS_DIR / "final_model.txt"
+    if final_pointer_path.exists():
+        pointer_value = final_pointer_path.read_text(encoding="utf-8").strip()
+        if pointer_value:
+            candidate = Path(pointer_value)
+            if not candidate.is_absolute():
+                candidate = MODELS_DIR / candidate
+            if candidate.exists():
+                return candidate
+
+    fallback_model = MODELS_DIR / "resnet50_finetuned_best.keras"
+    if fallback_model.exists():
+        return fallback_model
+
+    return None
+
+
+def _maybe_generate_calibration_outputs() -> None:
+    # Generate calibration outputs when they are missing and a trained model is already available.
+    required_paths = [
+        METRICS_GLOBAL_DIR / "calibration_metrics.csv",
+        METRICS_GLOBAL_DIR / "reliability_bins.csv",
+        PLOTS_GLOBAL_DIR / "reliability_curve.png",
+    ]
+    if all(path.exists() for path in required_paths):
+        return
+
+    model_path = _resolve_default_calibration_model()
+    if model_path is None:
+        print("Calibration outputs skipped - no trained model found yet")
+        return
+
+    try:
+        from calibration import run_calibration
+
+        run_calibration(model_path=str(model_path))
+        print("Calibration outputs generated during EDA post-check")
+    except Exception as exc:
+        print(f"Calibration outputs skipped ({exc})")
+
+
 def run_eda() -> None:
     # Prepare folders and deterministic sampling
     ensure_directories()
@@ -86,6 +129,7 @@ def run_eda() -> None:
     summary_df = _save_dataset_summary(df)
     _plot_class_distribution(summary_df)
     _save_sample_grid(_sample_for_grid(df))
+    _maybe_generate_calibration_outputs()
 
     print(f"Total images: {len(df)}")
     print(f"Number of classes: {df['label'].nunique()}")

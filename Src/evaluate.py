@@ -20,17 +20,10 @@ from sklearn.metrics import (
     precision_recall_fscore_support,
 )
 
-from config import (
-    LOGS_DIR,
-    METRICS_GLOBAL_DIR,
-    MODEL_NAMES,
-    MODELS_DIR,
-    get_model_metrics_dir,
-    get_model_plots_dir,
-    ensure_directories,
-    set_global_seed,
-)
+from config import MODEL_NAMES, set_global_seed
 from data_loader import load_datasets, load_split_dataframe
+from experiment_utils import OutputPaths, get_default_output_paths
+from model_io import load_saved_model
 
 
 def _plot_confusion_matrix(cm: np.ndarray, class_names: List[str], title: str, output_path: Path) -> None:
@@ -70,18 +63,19 @@ def _evaluate_model(
     class_to_idx: Dict[str, int],
     test_df: pd.DataFrame,
     test_ds: tf.data.Dataset,
+    output_paths: OutputPaths,
 ) -> Dict[str, float]:
     # Load trained model and ensure per-model output folders exist
-    model_path = MODELS_DIR / f"{model_name}.keras"
+    model_path = output_paths.models_dir / f"{model_name}.keras"
     if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
-    model_metrics_dir = get_model_metrics_dir(model_name)
-    model_plots_dir = get_model_plots_dir(model_name)
+    model_metrics_dir = output_paths.model_metrics_dir(model_name)
+    model_plots_dir = output_paths.model_plots_dir(model_name)
     model_metrics_dir.mkdir(parents=True, exist_ok=True)
     model_plots_dir.mkdir(parents=True, exist_ok=True)
 
-    model = tf.keras.models.load_model(model_path)
+    model = load_saved_model(model_path, compile_model=False)
 
     # Run inference and compute aggregate classification metrics
     y_true = test_df["label"].map(class_to_idx).to_numpy()
@@ -145,9 +139,9 @@ def _evaluate_model(
     return {**metrics_row, **inference_row, **size_row}
 
 
-def _save_model_comparison(evaluation_df: pd.DataFrame) -> None:
+def _save_model_comparison(evaluation_df: pd.DataFrame, output_paths: OutputPaths) -> None:
     # Merge evaluation summary with latest training metadata for comparison table
-    experiment_log_path = LOGS_DIR / "experiment_log.csv"
+    experiment_log_path = output_paths.logs_dir / "experiment_log.csv"
     if not experiment_log_path.exists():
         return
 
@@ -172,18 +166,23 @@ def _save_model_comparison(evaluation_df: pd.DataFrame) -> None:
         }
     )[["Model", "Test Acc", "Macro F1", "Params", "Training Time"]]
 
-    comparison_df.to_csv(METRICS_GLOBAL_DIR / "model_comparison.csv", index=False)
+    comparison_df.to_csv(output_paths.metrics_global_dir / "model_comparison.csv", index=False)
     print("\nModel comparison:")
     print(comparison_df.to_string(index=False))
 
 
-def run_evaluation() -> None:
+def run_evaluation(
+    output_paths: OutputPaths | None = None,
+    model_names: List[str] | None = None,
+) -> None:
     # Prepare folders and deterministic evaluation behavior
-    ensure_directories()
+    output_paths = output_paths or get_default_output_paths()
+    eval_model_names = list(model_names or MODEL_NAMES)
+    output_paths.ensure_directories(model_names=eval_model_names)
     set_global_seed()
 
     # Load test data and label mapping
-    _, _, test_ds, class_names = load_datasets()
+    _, _, test_ds, class_names = load_datasets(output_paths=output_paths)
     test_df = load_split_dataframe("test")
     class_to_idx = {name: idx for idx, name in enumerate(class_names)}
 
@@ -192,8 +191,8 @@ def run_evaluation() -> None:
     model_size_rows = []
 
     # Evaluate each configured model and collect summary rows
-    for model_name in MODEL_NAMES:
-        metrics = _evaluate_model(model_name, class_names, class_to_idx, test_df, test_ds)
+    for model_name in eval_model_names:
+        metrics = _evaluate_model(model_name, class_names, class_to_idx, test_df, test_ds, output_paths=output_paths)
 
         evaluation_rows.append(
             {
@@ -223,10 +222,10 @@ def run_evaluation() -> None:
 
     # Save global evaluation outputs used by error analysis and reporting
     evaluation_df = pd.DataFrame(evaluation_rows)
-    evaluation_df.to_csv(METRICS_GLOBAL_DIR / "evaluation_summary.csv", index=False)
-    pd.DataFrame(inference_rows).to_csv(METRICS_GLOBAL_DIR / "inference_time.csv", index=False)
-    pd.DataFrame(model_size_rows).to_csv(METRICS_GLOBAL_DIR / "model_size.csv", index=False)
-    _save_model_comparison(evaluation_df)
+    evaluation_df.to_csv(output_paths.metrics_global_dir / "evaluation_summary.csv", index=False)
+    pd.DataFrame(inference_rows).to_csv(output_paths.metrics_global_dir / "inference_time.csv", index=False)
+    pd.DataFrame(model_size_rows).to_csv(output_paths.metrics_global_dir / "model_size.csv", index=False)
+    _save_model_comparison(evaluation_df, output_paths=output_paths)
 
     print("Evaluation complete. Metrics and confusion matrices are saved.")
 

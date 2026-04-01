@@ -16,15 +16,10 @@ import tensorflow as tf
 from PIL import Image
 from sklearn.metrics import confusion_matrix
 
-from config import (
-    METRICS_GLOBAL_DIR,
-    MISCLASSIFIED_DIR,
-    MODELS_DIR,
-    get_model_plots_dir,
-    ensure_directories,
-    set_global_seed,
-)
+from config import set_global_seed
 from data_loader import load_datasets, load_split_dataframe
+from experiment_utils import OutputPaths, get_default_output_paths
+from model_io import load_saved_model
 
 
 def _safe_name(value: str) -> str:
@@ -32,9 +27,9 @@ def _safe_name(value: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_-]+", "-", value.strip()).strip("-") or "unknown"
 
 
-def _save_misclassified_images(misclassified_df: pd.DataFrame, model_name: str) -> None:
+def _save_misclassified_images(misclassified_df: pd.DataFrame, model_name: str, output_paths: OutputPaths) -> None:
     # Save each misclassified sample with true/pred labels in the filename
-    output_dir = MISCLASSIFIED_DIR / model_name
+    output_dir = output_paths.misclassified_dir / model_name
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for _, row in misclassified_df.iterrows():
@@ -58,7 +53,7 @@ def _save_misclassified_images(misclassified_df: pd.DataFrame, model_name: str) 
             image.convert("RGB").save(target_path, format="JPEG")
 
 
-def _save_confusion_example_grid(misclassified_df: pd.DataFrame, model_name: str) -> None:
+def _save_confusion_example_grid(misclassified_df: pd.DataFrame, model_name: str, output_paths: OutputPaths) -> None:
     # Build a quick visual grid of the most common confusion pairs
     if misclassified_df.empty:
         return
@@ -85,34 +80,36 @@ def _save_confusion_example_grid(misclassified_df: pd.DataFrame, model_name: str
     for idx in range(n_images, len(axes)):
         axes[idx].axis("off")
 
-    model_plots_dir = get_model_plots_dir(model_name)
+    model_plots_dir = output_paths.model_plots_dir(model_name)
+    model_plots_dir.mkdir(parents=True, exist_ok=True)
     plt.tight_layout()
     plt.savefig(model_plots_dir / "common_confusions.png", dpi=220)
     plt.close(fig)
 
 
-def _select_analysis_model(preferred_model: str | None = None) -> str:
+def _select_analysis_model(output_paths: OutputPaths, preferred_model: str | None = None) -> str:
     # Use the caller preference first, then fallback to best macro-F1 model
     if preferred_model:
         return preferred_model
 
-    summary_path = METRICS_GLOBAL_DIR / "evaluation_summary.csv"
+    summary_path = output_paths.metrics_global_dir / "evaluation_summary.csv"
     if summary_path.exists():
         summary_df = pd.read_csv(summary_path)
         if not summary_df.empty and "macro_f1" in summary_df.columns:
             best_row = summary_df.sort_values("macro_f1", ascending=False).iloc[0]
             return str(best_row["model_name"])
 
-    return "mobilenet_finetuned"
+    return "resnet50_finetuned"
 
 
-def run_error_analysis(model_name: str | None = None) -> None:
+def run_error_analysis(model_name: str | None = None, output_paths: OutputPaths | None = None) -> None:
     # Prepare folders and deterministic behavior
-    ensure_directories()
+    output_paths = output_paths or get_default_output_paths()
+    output_paths.ensure_directories()
     set_global_seed()
 
     # Load test data and label mappings used for decoding predictions
-    _, _, test_ds, class_names = load_datasets()
+    _, _, test_ds, class_names = load_datasets(output_paths=output_paths)
     test_df = load_split_dataframe("test").reset_index(drop=True)
     class_to_idx: Dict[str, int] = {label: idx for idx, label in enumerate(class_names)}
     idx_to_class: Dict[int, str] = {idx: label for label, idx in class_to_idx.items()}
@@ -120,12 +117,12 @@ def run_error_analysis(model_name: str | None = None) -> None:
     y_true = test_df["label"].map(class_to_idx).to_numpy()
 
     # Select model, run inference, and compute per-sample confidence
-    analysis_model_name = _select_analysis_model(model_name)
-    model_path = MODELS_DIR / f"{analysis_model_name}.keras"
+    analysis_model_name = _select_analysis_model(output_paths=output_paths, preferred_model=model_name)
+    model_path = output_paths.models_dir / f"{analysis_model_name}.keras"
     if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
-    model = tf.keras.models.load_model(model_path)
+    model = load_saved_model(model_path, compile_model=False)
     probabilities = model.predict(test_ds, verbose=0)
     y_pred = np.argmax(probabilities, axis=1)
     confidence = np.max(probabilities, axis=1)
@@ -137,8 +134,8 @@ def run_error_analysis(model_name: str | None = None) -> None:
     misclassified_df["confidence"] = confidence[mis_mask]
 
     # Save example mistakes for qualitative inspection
-    _save_misclassified_images(misclassified_df, analysis_model_name)
-    _save_confusion_example_grid(misclassified_df, analysis_model_name)
+    _save_misclassified_images(misclassified_df, analysis_model_name, output_paths=output_paths)
+    _save_confusion_example_grid(misclassified_df, analysis_model_name, output_paths=output_paths)
 
     # Build confusion matrix and derive worst-recall classes
     cm = confusion_matrix(y_true, y_pred, labels=np.arange(len(class_names)))
@@ -173,9 +170,9 @@ def run_error_analysis(model_name: str | None = None) -> None:
 
     # Save ranked confusion tables for reporting
     confusion_df = pd.DataFrame(confusion_rows).sort_values("count", ascending=False)
-    confusion_df.to_csv(METRICS_GLOBAL_DIR / "confusion_counts.csv", index=False)
-    confusion_df.head(10).to_csv(METRICS_GLOBAL_DIR / "top_confusions.csv", index=False)
-    pd.DataFrame(worst_rows).to_csv(METRICS_GLOBAL_DIR / "worst_classes.csv", index=False)
+    confusion_df.to_csv(output_paths.metrics_global_dir / "confusion_counts.csv", index=False)
+    confusion_df.head(10).to_csv(output_paths.metrics_global_dir / "top_confusions.csv", index=False)
+    pd.DataFrame(worst_rows).to_csv(output_paths.metrics_global_dir / "worst_classes.csv", index=False)
 
     print(f"Error analysis complete for {analysis_model_name}. Misclassifications and confusion summaries are saved.")
 

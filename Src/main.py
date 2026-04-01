@@ -9,15 +9,18 @@ import argparse
 import csv
 import os
 from pathlib import Path
+from typing import List
 
 # Set TensorFlow log controls before importing modules that load TensorFlow.
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 os.environ.setdefault("TF_ENABLE_ONEDNN_OPTS", "0")
 
-from config import SPLITS_DIR
+from calibration import run_calibration
+from config import SPLITS_DIR, apply_overrides
 from eda import run_eda
 from error_analysis import run_error_analysis
 from evaluate import run_evaluation
+from experiment_utils import create_experiment_output_paths, load_override_config, resolve_experiment_config_path
 from make_splits import create_splits
 from predict import run_prediction
 from train import run_training
@@ -29,7 +32,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--mode",
         required=True,
-        choices=["make_splits", "eda", "train", "evaluate", "error_analysis", "predict", "run_all"],
+        choices=["make_splits", "eda", "train", "evaluate", "error_analysis", "predict", "run_all", "experiment", "calibration"],
         help="Pipeline mode to execute",
     )
 
@@ -38,7 +41,88 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model_path", help="Optional override model path for predict mode")
     parser.add_argument("--class_names_path", help="Optional override class names path for predict mode")
     parser.add_argument("--save_csv", help="Optional CSV path to append prediction results in predict mode")
+    parser.add_argument("--exp_name", help="Experiment folder name under experiments/")
+    parser.add_argument("--config_path", help="Optional custom path for config override file")
+    parser.add_argument(
+        "--steps",
+        nargs="+",
+        help="Optional experiment steps (e.g. --steps train evaluate error_analysis or --steps calibration)",
+    )
     return parser
+
+
+def _parse_steps(cli_steps: List[str] | None, config_steps: object | None) -> List[str]:
+    # Experiments can run full flows or targeted steps without changing core pipeline modes.
+    source_steps: List[str] = []
+    if cli_steps:
+        source_steps = list(cli_steps)
+    elif isinstance(config_steps, list):
+        source_steps = [str(step) for step in config_steps]
+    elif isinstance(config_steps, str):
+        source_steps = [config_steps]
+    else:
+        source_steps = ["train", "evaluate", "error_analysis"]
+
+    normalized_steps: List[str] = []
+    for raw_step in source_steps:
+        for token in str(raw_step).split(","):
+            step = token.strip().lower()
+            if step:
+                normalized_steps.append(step)
+
+    valid_steps = {"train", "evaluate", "error_analysis", "calibration"}
+    invalid_steps = [step for step in normalized_steps if step not in valid_steps]
+    if invalid_steps:
+        raise ValueError(f"Unsupported experiment steps: {invalid_steps}. Valid steps: {sorted(valid_steps)}")
+
+    return normalized_steps
+
+
+def _run_experiment(args: argparse.Namespace) -> None:
+    # Experiment mode isolates artifacts under experiments/<exp_name>/results/.
+    if not args.exp_name:
+        raise ValueError("--exp_name is required when --mode experiment")
+
+    override_path = resolve_experiment_config_path(args.exp_name, args.config_path)
+    overrides = load_override_config(override_path)
+    output_paths = create_experiment_output_paths(args.exp_name)
+
+    # Keep experiment outputs isolated from the stable results/ baseline.
+    overrides["results_dir"] = str(output_paths.results_dir)
+    run_config = apply_overrides(overrides)
+
+    steps = _parse_steps(args.steps, run_config.get("steps"))
+    trained_model_names: List[str] = []
+
+    for step in steps:
+        if step == "train":
+            print("-> Running experiment training...")
+            trained_model_names = run_training(output_paths=output_paths, run_config=run_config)
+            print("OK: experiment training complete")
+            continue
+
+        if step == "evaluate":
+            eval_models = trained_model_names or run_config.get("model_names") or run_config.get("evaluation_models")
+            if not eval_models:
+                raise ValueError("Evaluation step needs trained models or a 'model_names' list in config_override.")
+            print("-> Running experiment evaluation...")
+            run_evaluation(output_paths=output_paths, model_names=list(eval_models))
+            print("OK: experiment evaluation complete")
+            continue
+
+        if step == "error_analysis":
+            print("-> Running experiment error analysis...")
+            run_error_analysis(model_name=run_config.get("analysis_model"), output_paths=output_paths)
+            print("OK: experiment error analysis complete")
+            continue
+
+        if step == "calibration":
+            # Confidence is not the same as correctness, so calibration is a useful separate check.
+            model_path = args.model_path or run_config.get("model_path")
+            print("-> Running experiment calibration...")
+            run_calibration(model_path=model_path, output_paths=output_paths)
+            print("OK: experiment calibration complete")
+            continue
 
 
 def _resolve_predict_smoke_image() -> str | None:
@@ -154,6 +238,16 @@ def main() -> None:
             class_names_path=args.class_names_path,
             save_csv=args.save_csv,
         )
+        return
+
+    # Run experiment-specific steps with override config and isolated outputs.
+    if args.mode == "experiment":
+        _run_experiment(args)
+        return
+
+    # Run calibration metrics/plots for a chosen model.
+    if args.mode == "calibration":
+        run_calibration(model_path=args.model_path)
         return
 
     # Run the full pipeline end to end in one command.

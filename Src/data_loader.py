@@ -12,7 +12,8 @@ from typing import Dict, List, Tuple
 import pandas as pd
 import tensorflow as tf
 
-from config import BATCH_SIZE, IMAGE_SIZE, MODELS_DIR, SEED, SPLITS_DIR, ensure_directories
+from config import BATCH_SIZE, IMAGE_SIZE, MODELS_DIR, SEED, SPLITS_DIR
+from experiment_utils import OutputPaths, get_default_output_paths
 
 # Define lightweight augmentation used only for training batches
 TRAIN_AUGMENTATION = tf.keras.Sequential(
@@ -34,9 +35,9 @@ def load_split_dataframe(split_name: str) -> pd.DataFrame:
     return pd.read_csv(split_path)
 
 
-def _save_class_names(class_names: List[str]) -> None:
+def _save_class_names(class_names: List[str], class_names_path: Path) -> None:
     # Persist class ordering so evaluation/prediction decode labels consistently
-    class_names_path = MODELS_DIR / "class_names.json"
+    class_names_path.parent.mkdir(parents=True, exist_ok=True)
     class_names_path.write_text(json.dumps(class_names, indent=2), encoding="utf-8")
 
 
@@ -64,7 +65,7 @@ def _apply_train_augmentation(image: tf.Tensor, label: tf.Tensor) -> Tuple[tf.Te
     return image, label
 
 
-def _build_dataset(df: pd.DataFrame, batch_size: int, is_training: bool) -> tf.data.Dataset:
+def _build_dataset(df: pd.DataFrame, batch_size: int, is_training: bool, use_augmentation: bool) -> tf.data.Dataset:
     # Build base dataset from file paths and numeric labels
     dataset = tf.data.Dataset.from_tensor_slices(
         (
@@ -81,7 +82,7 @@ def _build_dataset(df: pd.DataFrame, batch_size: int, is_training: bool) -> tf.d
     # We cache decoded tensors first so random augmentation can still vary every epoch.
     dataset = dataset.cache()
 
-    if is_training:
+    if is_training and use_augmentation:
         dataset = dataset.map(_apply_train_augmentation, num_parallel_calls=tf.data.AUTOTUNE)
 
     # Prefetch keeps the GPU/CPU fed while the next batch is prepared in the background.
@@ -89,9 +90,14 @@ def _build_dataset(df: pd.DataFrame, batch_size: int, is_training: bool) -> tf.d
     return dataset
 
 
-def load_datasets(batch_size: int = BATCH_SIZE) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset, List[str]]:
-    # Ensure output folders are available before saving class metadata
-    ensure_directories()
+def load_datasets(
+    batch_size: int = BATCH_SIZE,
+    use_augmentation: bool = True,
+    output_paths: OutputPaths | None = None,
+) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset, List[str]]:
+    # Default behavior stays unchanged, but experiments can inject isolated output roots.
+    output_paths = output_paths or get_default_output_paths()
+    output_paths.ensure_directories()
 
     # Load split CSV files prepared by make_splits.py
     train_df = load_split_dataframe("train")
@@ -108,10 +114,10 @@ def load_datasets(batch_size: int = BATCH_SIZE) -> Tuple[tf.data.Dataset, tf.dat
             raise ValueError("Found labels in val/test that are missing from train split.")
 
     # Save class names and build tf.data pipelines for each split
-    _save_class_names(class_names)
+    _save_class_names(class_names, output_paths.class_names_path)
 
-    train_ds = _build_dataset(train_df, batch_size=batch_size, is_training=True)
-    val_ds = _build_dataset(val_df, batch_size=batch_size, is_training=False)
-    test_ds = _build_dataset(test_df, batch_size=batch_size, is_training=False)
+    train_ds = _build_dataset(train_df, batch_size=batch_size, is_training=True, use_augmentation=use_augmentation)
+    val_ds = _build_dataset(val_df, batch_size=batch_size, is_training=False, use_augmentation=use_augmentation)
+    test_ds = _build_dataset(test_df, batch_size=batch_size, is_training=False, use_augmentation=use_augmentation)
 
     return train_ds, val_ds, test_ds, class_names
