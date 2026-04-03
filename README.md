@@ -41,8 +41,7 @@ This repository implements a full dissertation-ready image classification pipeli
 │   ├── app.py
 │   ├── utils.py
 │   ├── launch_dashboard.bat
-│   ├── launch_dashboard.ps1
-│   └── DASHBOARD_FEATURES_SUMMARY.md
+│   └── launch_dashboard.ps1
 ├── src/
 │   ├── config.py
 │   ├── make_splits.py
@@ -226,7 +225,6 @@ Dashboard implementation files:
 - `dashboard/utils.py` -> scope discovery, artifact loading, prediction helpers
 - `dashboard/launch_dashboard.bat` -> one-click launcher (Windows)
 - `dashboard/launch_dashboard.ps1` -> PowerShell launcher
-- `dashboard/DASHBOARD_FEATURES_SUMMARY.md` -> detailed dashboard architecture and features
 
 ## Notes
 
