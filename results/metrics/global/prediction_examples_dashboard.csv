@@ -1,0 +1,10 @@
+image_name,predicted_class,confidence,top3_classes,model_name
+pizzabox (1).jpg,Paper,99.94000244140625,Paper (99.94%); Mixed (0.05%); Wood (0.01%),resnet50_finetuned_best.keras
+PlasticSpoon (1).jpg,Plastic,99.61000061035156,Plastic (99.61%); Mixed (0.34%); Ceramic (0.02%),resnet50_finetuned_best.keras
+PlasticSpoon (1).jpg,Plastic,99.61000061035156,Plastic (99.61%); Mixed (0.34%); Ceramic (0.02%),resnet50_finetuned_best.keras
+CPS65W.jpg,Plastic,76.63999938964844,Plastic (76.64%); Mixed (22.13%); Wood (0.62%),resnet50_finetuned_best.keras
+nobrand_ds_plastic_wht_pk50_01__83231.jpg,Plastic,95.19999694824219,Plastic (95.20%); Mixed (4.64%); Styrofoam (0.08%),resnet50_finetuned_best.keras
+nobrand_ds_plastic_wht_pk50_01__83231.jpg,Plastic,95.19999694824219,Plastic (95.20%); Mixed (4.64%); Styrofoam (0.08%),resnet50_finetuned_best.keras
+nobrand_ds_plastic_wht_pk50_01__83231.jpg,Plastic,95.19999694824219,Plastic (95.20%); Mixed (4.64%); Styrofoam (0.08%),resnet50_finetuned_best.keras
+nobrand_ds_plastic_wht_pk50_01__83231.jpg,Plastic,95.19999694824219,Plastic (95.20%); Mixed (4.64%); Styrofoam (0.08%),resnet50_finetuned_best.keras
+nobrand_ds_plastic_wht_pk50_01__83231.jpg,Plastic,95.19999694824219,Plastic (95.20%); Mixed (4.64%); Styrofoam (0.08%),resnet50_finetuned_best.keras

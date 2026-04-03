@@ -1,0 +1,2 @@
+model_name,num_samples,ece,brier_score,mean_confidence,accuracy
+resnet50_finetuned_best,1194,0.018412,0.143407,0.918988,0.90201

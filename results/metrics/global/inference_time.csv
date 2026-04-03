@@ -1,4 +1,4 @@
 model_name,num_samples,total_inference_time_sec,avg_inference_time_ms
-baseline_cnn,1194,3.843646,3.2191
-mobilenet_frozen,1194,11.149616,9.338
-mobilenet_finetuned,1194,10.95707,9.1768
+baseline_cnn,1194,3.96695,3.3224
+resnet50_frozen,1194,28.666647,24.0089
+resnet50_finetuned,1194,31.140221,26.0806

@@ -1,6 +1,6 @@
 model_name,label,recall
-mobilenet_finetuned,Styrofoam,0.722222
-mobilenet_finetuned,Plastic,0.774908
-mobilenet_finetuned,Paper,0.789474
-mobilenet_finetuned,Mixed,0.818436
-mobilenet_finetuned,Glass,0.875
+resnet50_finetuned,Styrofoam,0.722222
+resnet50_finetuned,Rubber,0.820513
+resnet50_finetuned,Paper,0.855263
+resnet50_finetuned,Glass,0.875
+resnet50_finetuned,Plastic,0.885609
