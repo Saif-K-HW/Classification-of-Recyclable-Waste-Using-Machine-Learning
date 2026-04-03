@@ -37,6 +37,12 @@ This repository implements a full dissertation-ready image classification pipeli
 │   ├── exp03_class_imbalance/
 │   ├── exp04_finetune_schedule/
 │   └── exp05_calibration/
+├── dashboard/
+│   ├── app.py
+│   ├── utils.py
+│   ├── launch_dashboard.bat
+│   ├── launch_dashboard.ps1
+│   └── DASHBOARD_FEATURES_SUMMARY.md
 ├── src/
 │   ├── config.py
 │   ├── make_splits.py
@@ -182,6 +188,45 @@ python src/main.py --mode predict \
   --model_path "models/resnet50_finetuned_best.keras" \
   --save_csv "results/metrics/global/prediction_examples.csv"
 ```
+
+## Dashboard (Streamlit)
+
+Use the dashboard for interactive prediction and artifact review.
+
+Quick launch (Windows):
+
+```bash
+dashboard/launch_dashboard.bat
+```
+
+PowerShell launch:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File dashboard/launch_dashboard.ps1
+```
+
+Or run manually:
+
+```bash
+python -m streamlit run dashboard/app.py
+```
+
+Dashboard features include:
+
+- Sidebar navigation pages (Overview, Prediction, Metrics, Error Analysis, Calibration, Artifacts)
+- Live single-image prediction with top-3 confidence output
+- Scope switch between stable outputs and experiment outputs
+- Calibration artifact generation button for missing files
+- Error-analysis visuals with confusion plots and misclassified image gallery
+- Live artifact reading from disk with Refresh support
+
+Dashboard implementation files:
+
+- `dashboard/app.py` -> Streamlit UI and page rendering
+- `dashboard/utils.py` -> scope discovery, artifact loading, prediction helpers
+- `dashboard/launch_dashboard.bat` -> one-click launcher (Windows)
+- `dashboard/launch_dashboard.ps1` -> PowerShell launcher
+- `dashboard/DASHBOARD_FEATURES_SUMMARY.md` -> detailed dashboard architecture and features
 
 ## Notes
 
