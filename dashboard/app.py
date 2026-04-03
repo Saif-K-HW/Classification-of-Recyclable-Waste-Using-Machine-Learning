@@ -1,6 +1,6 @@
 """
-Recyclyst Dashboard
-Modern Streamlit dashboard for prediction, metrics, error analysis, and calibration review
+Dashboard Entry Point
+Renders the Streamlit UI for prediction, metrics, error analysis, and calibration review.
 """
 
 from __future__ import annotations
@@ -15,10 +15,13 @@ from PIL import Image, ImageOps
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = PROJECT_ROOT / "src"
+
+# Add src/ to import path so dashboard can reuse pipeline modules when launched from dashboard/.
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from utils import (  # noqa: E402
+# Import dashboard helpers after path setup; noqa keeps this intentional import order lint-clean.
+from utils import (  
     append_prediction_row,
     discover_scopes,
     get_classification_reports,
@@ -35,6 +38,7 @@ from utils import (  # noqa: E402
 )
 
 
+# Configure page metadata before rendering any Streamlit elements.
 st.set_page_config(
     page_title="Recyclyst Dashboard",
     page_icon="♻️",
@@ -44,6 +48,7 @@ st.set_page_config(
 
 
 def _inject_styles() -> None:
+    # Inject one global CSS theme so all pages share the same visual language.
     st.markdown(
         """
         <style>
@@ -312,6 +317,7 @@ def _inject_styles() -> None:
 
 
 def _render_header(scope_label: str, show_title: bool = False) -> None:
+    # Keep the full dashboard title only on Overview while reusing subtitle text everywhere.
     title_html = "<h1>Machine Learning Dashboard</h1>" if show_title else ""
     subtitle_html = (
         f"<p>Interactive workspace for <strong>{scope_label}</strong>. "
@@ -322,6 +328,7 @@ def _render_header(scope_label: str, show_title: bool = False) -> None:
 
 
 def _render_artifact_status(scope) -> None:
+    # Render quick availability cards for key files in the active workspace scope.
     artifact_paths = get_dashboard_artifact_paths(scope)
 
     col1, col2, col3 = st.columns(3)
@@ -343,6 +350,7 @@ def _render_artifact_status(scope) -> None:
 
 
 def _render_highlights(scope, table_rows: int) -> None:
+    # Load shared metrics/plot artifacts used by the overview highlight cards and charts.
     st.markdown("### Performance Highlights")
     metrics_global = scope.results_dir / "metrics" / "global"
     plots_global = scope.results_dir / "plots" / "global"
@@ -354,6 +362,7 @@ def _render_highlights(scope, table_rows: int) -> None:
     reliability_bins = read_csv_safe(metrics_global / "reliability_bins.csv")
     reliability_curve = plots_global / "reliability_curve.png"
 
+    # Split overview into performance summary (left) and error snapshot (right).
     left, right = st.columns([1.35, 1])
 
     with left:
@@ -406,6 +415,7 @@ def _render_highlights(scope, table_rows: int) -> None:
         if worst_classes is not None and not worst_classes.empty:
             st.dataframe(worst_classes.head(table_rows), use_container_width=True)
 
+    # Surface calibration quality directly on overview to avoid extra page switches.
     st.markdown("#### Calibration at a glance")
     c1, c2 = st.columns([1, 1])
     with c1:
@@ -437,9 +447,11 @@ def _render_highlights(scope, table_rows: int) -> None:
 
 
 def _render_predict_tab(scope) -> None:
+    # Prediction tab reuses trained checkpoints and the existing src/predict inference flow.
     st.subheader("Live Prediction")
     st.caption("Upload an image, select a model, and run top-3 class inference.")
 
+    # Resolve model list and pick the same default the pipeline marks as current best.
     model_files = list_model_files(scope)
     default_model = resolve_default_model(scope)
 
@@ -455,6 +467,7 @@ def _render_predict_tab(scope) -> None:
     selected_label = st.selectbox("Model checkpoint", model_labels, index=default_index)
     selected_model = PROJECT_ROOT / selected_label
 
+    # Accept common image formats from users for one-click inference.
     uploaded = st.file_uploader(
         "Upload an image",
         type=["jpg", "jpeg", "png", "bmp", "webp"],
@@ -464,6 +477,7 @@ def _render_predict_tab(scope) -> None:
     save_prediction = st.checkbox("Save this prediction in metrics log", value=True)
     log_path = scope.results_dir / "metrics" / "global" / "prediction_examples_dashboard.csv"
 
+    # Run inference only after both file upload and explicit user trigger.
     if uploaded and st.button("Run Prediction", type="primary"):
         with st.spinner("Running model inference..."):
             result = run_uploaded_prediction(
@@ -494,12 +508,14 @@ def _render_predict_tab(scope) -> None:
             chart.update_traces(texttemplate="%{text:.2f}%", textposition="outside")
             st.plotly_chart(chart, use_container_width=True)
 
+        # Optionally append results for traceability and quick demo logs.
         if save_prediction:
             append_prediction_row(log_path, uploaded.name, result)
             st.success(f"Prediction row appended to `{log_path.relative_to(PROJECT_ROOT)}`")
 
 
 def _render_metrics_tab(scope) -> None:
+    # Metrics tab combines global comparisons with per-model classification reports.
     st.subheader("Training & Evaluation")
 
     metrics_global = scope.results_dir / "metrics" / "global"
@@ -538,6 +554,7 @@ def _render_metrics_tab(scope) -> None:
             scatter.update_layout(height=390, margin=dict(l=10, r=10, t=40, b=10))
             st.plotly_chart(scatter, use_container_width=True)
 
+    # Report selector lets users inspect class-wise precision/recall for each model.
     st.markdown("#### Classification Reports")
     reports = get_classification_reports(scope)
     if not reports:
@@ -553,6 +570,7 @@ def _render_metrics_tab(scope) -> None:
 
 
 def _render_error_tab(scope, gallery_limit: int = 12) -> None:
+    # Error tab summarizes where predictions fail and visualizes failure examples.
     st.subheader("Error Analysis")
 
     metrics_global = scope.results_dir / "metrics" / "global"
@@ -574,6 +592,7 @@ def _render_error_tab(scope, gallery_limit: int = 12) -> None:
         else:
             st.info("`worst_classes.csv` not available.")
 
+    # Show confusion artifacts first, with graceful fallbacks when files are missing.
     st.markdown("#### Confusion Visuals")
     confusion_images = get_confusion_images(scope)
     common_images = get_common_confusion_images(scope)
@@ -610,6 +629,7 @@ def _render_error_tab(scope, gallery_limit: int = 12) -> None:
         else:
             st.info("No `common_confusions.png` found for this model.")
 
+    # Build a misclassified image gallery, falling back to any available model samples.
     st.markdown("#### Misclassified Example Gallery")
     sample_paths = list_misclassified_images(scope, model_choice, limit=gallery_limit)
     showing_fallback = False
@@ -622,6 +642,7 @@ def _render_error_tab(scope, gallery_limit: int = 12) -> None:
             st.info("No misclassified images found yet in this scope.")
             return
 
+    # Filter extreme aspect ratios so gallery tiles stay visually consistent.
     display_paths = []
     for image_path in sample_paths:
         try:
@@ -656,6 +677,7 @@ def _render_error_tab(scope, gallery_limit: int = 12) -> None:
 
 
 def _render_calibration_tab(scope) -> None:
+    # Calibration tab checks confidence alignment against true accuracy.
     st.subheader("Calibration")
 
     metrics_global = scope.results_dir / "metrics" / "global"
@@ -671,6 +693,7 @@ def _render_calibration_tab(scope) -> None:
     else:
         st.info("`calibration_metrics.csv` not available.")
 
+    # Place trend chart and saved curve image side-by-side for faster comparison.
     left, right = st.columns(2)
     with left:
         st.markdown("#### Reliability Trend")
@@ -707,6 +730,7 @@ def _render_calibration_tab(scope) -> None:
 
 
 def _render_artifacts_tab(scope) -> None:
+    # Artifact browser gives a quick audit table for expected output files.
     st.subheader("Artifact Browser")
     st.caption("Use this to confirm what is current after every new training/evaluation run.")
 
@@ -724,6 +748,7 @@ def _render_artifacts_tab(scope) -> None:
 
 
 def _render_help_tab(scope) -> None:
+    # Help page documents project purpose, workflow, and what each dashboard page covers.
     st.subheader("Help & Project Guide")
     st.markdown(
         """
@@ -758,13 +783,16 @@ def _render_help_tab(scope) -> None:
 
 
 def main() -> None:
+    # Apply UI styles once and configure shared display limits.
     _inject_styles()
     table_rows = 10
     gallery_limit = 12
 
+    # Discover all available result scopes and map labels for the top-right selector.
     scopes = discover_scopes()
     scope_labels = {scope.label: scope for scope in scopes}
 
+    # Top navigation layout: brand (left), pages (center), workspace picker (right).
     top_left, top_mid, top_right = st.columns([1.9, 5.2, 1.9])
     with top_left:
         st.markdown(
@@ -783,8 +811,10 @@ def main() -> None:
         selected_scope_label = st.selectbox("Workspace", list(scope_labels.keys()), key="workspace_top")
         selected_scope = scope_labels[selected_scope_label]
 
+    # Keep the hero subtitle scope-aware and only show title text on the Overview page.
     _render_header(selected_scope.label, show_title=(page == "Overview"))
 
+    # Route the selected top navigation page to its corresponding renderer.
     if page == "Overview":
         _render_highlights(selected_scope, table_rows=table_rows)
     elif page == "Prediction":
